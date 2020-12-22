@@ -1,0 +1,23 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pylint = "*"
+
+[packages]
+fastapi = {extras = ["all"], version = "*"}
+sqlalchemy = "*"
+python-multipart = "*"
+aiofiles = "*"
+fastapi-users = {extras = ["mongodb"], version = "*"}
+pytest = "*"
+coverage = "*"
+pytest-cov = "*"
+pydantic = {extras = ["email"], version = "*"}
+motor = "*"
+gunicorn = "*"
+
+[requires]
+python_version = "3.8"
