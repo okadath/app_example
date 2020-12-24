@@ -1,8 +1,9 @@
 import motor.motor_asyncio
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Depends, Response
 from fastapi_users import FastAPIUsers, models
 from fastapi_users.authentication import JWTAuthentication
-from fastapi_users.db import MongoDBUserDatabase
+from fastapi_users.db import MongoDBUserDatabase 
+
 
 DATABASE_URL = "mongodb://localhost:27017"
 # openssl rand -hex 32
@@ -34,13 +35,6 @@ collection_profiles = db["profiles"]
 user_db = MongoDBUserDatabase(UserDB, collection_users)
 
 collection_profiles.create_index("user", unique=True)
-
-def profile_helper(profile) -> dict:
-    return {
-        "id":str(profile["_id"]),
-        "pic":profile["pic"],
-        "user":str(profile["user"]),
-    }
 
 from bson.objectid import ObjectId
 
@@ -84,6 +78,9 @@ app.include_router(
 app.include_router(
     fastapi_users.get_register_router(on_after_register), prefix="/auth", tags=["auth"]
 )
+# app.include_router(
+#     fastapi_users. #get_register_router(on_after_register), prefix="/auth", tags=["auth"]
+# )
 app.include_router(
     fastapi_users.get_reset_password_router(
         SECRET, after_forgot_password=on_after_forgot_password
@@ -92,3 +89,11 @@ app.include_router(
     tags=["auth"],
 )
 app.include_router(fastapi_users.get_users_router(), prefix="/users", tags=["users"])
+
+
+@app.post("/auth/jwt/refresh", tags=["auth"]) 
+async def refresh_jwt( response: Response, user=Depends(fastapi_users.get_current_active_user)):
+    print(user)
+    print(response)
+    return await jwt_authentication.get_login_response(user, response)
+

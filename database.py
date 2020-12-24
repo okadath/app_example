@@ -1,22 +1,25 @@
 import motor.motor_asyncio
-
+from user import db
 
 # las definiciones no requieren ningun await
 
-MONGO_DETAILS="mongodb://localhost:27017"
+# MONGO_DETAILS="mongodb://localhost:27017"
 
-client=motor.motor_asyncio.AsyncIOMotorClient(MONGO_DETAILS)
+# client=motor.motor_asyncio.AsyncIOMotorClient(MONGO_DETAILS)
 
-database = client.data_app
-
+# database = client.data_app
+database=db
 # student_collection = database.get_collection("students_collection")
-profile_collection = database.get_collection("profiles_collection")
+profile_collection = database.get_collection("profiles")
 profile_collection.create_index("user", unique=True)
 # student_collection.create_index("fullname", unique=True)
 # database.command(db.collection_name.createIndex( {field_name : 1} , {unqiue : true} ))
+# from pydantic import 
+from bson.objectid import ObjectId
 
 
 def profile_helper(profile) -> dict:
+    print(profile)
     return {
         "id":str(profile["_id"]),
         "pic":profile["pic"],
@@ -31,30 +34,33 @@ async def retrieve_profiles():
     async for profile in profile_collection.find():
         profiles.append(profile_helper(profile))
     return profiles
+from pydantic import UUID4
 
+async def retrieve_profile(user__uuid:str)->dict:
 
-async def retrieve_profile(id:str)->dict:
-    if ObjectId.is_valid(id):
-        profile= await  profile_collection.find_one({"_id":ObjectId(id)})
-        if profile:
-            return profile_helper(profile)
+    # if ObjectId.is_valid(user):
+    print(user__uuid)
+    profile= await  profile_collection.find_one({"user":UUID4(user__uuid)})
+    if profile:
+        return profile_helper(profile)
+    print("error")
     return {"error":"error"}
 
-async def update_profile(id:str,data:dict):
+async def update_profile(user__uuid:str,data:dict):
     if len(data)<1:
         return False
-    profile=await profile_collection.find_one({"_id":ObjectId(id)})
+    profile=await profile_collection.find_one({"user":UUID4(user__uuid)})
     if profile:
         update_profile=await profile_collection.update_one(
-            {"_id":ObjectId(id)},{"$set":data}
+            {"user":UUID4(user__uuid)},{"$set":data}
         )
     if update_profile:
         return True
     return False
 
-async def delete_profile(id:str):
-    profile=await profile_collection.find_one({"_id":ObjectId(id)})
+async def delete_profile(user__uuid:str):
+    profile=await profile_collection.find_one({"user":UUID4(user__uuid)})
     if profile:
-        await profile_collection.delete_one({"_id":ObjectId(id)})
+        await profile_collection.delete_one({"user":UUID4(user__uuid)})
         return True
     return False

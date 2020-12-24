@@ -23,7 +23,7 @@ class PyObjectId(ObjectId):
 
 class ProfileSchema(BaseModel):
     pic: str = Field(...)
-    user: Optional[PyObjectId] = Field(alias='user')
+    user: Optional[PyObjectId] = Field(alias='user_main')
 
     class Config:
         arbitrary_types_allowed = True
