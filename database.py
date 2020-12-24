@@ -47,16 +47,29 @@ async def retrieve_profile(user__uuid:str)->dict:
     return {"error":"error"}
 
 async def update_profile(user__uuid:str,data:dict):
-    if len(data)<1:
-        return False
-    profile=await profile_collection.find_one({"user":UUID4(user__uuid)})
-    if profile:
+
+    if len(data) >= 1:
+
         update_profile=await profile_collection.update_one(
             {"user":UUID4(user__uuid)},{"$set":data}
         )
-    if update_profile:
-        return True
-    return False
+        print(update_profile.modified_count)
+        if update_profile.modified_count == 1:
+             if (
+
+                updated_task := await profile_collection.find_one({"user":UUID4(user__uuid)})
+
+            ) is not None:
+                print(updated_task)
+                return updated_task
+    if (
+
+        existing_task := await profile_collection.find_one({"user":UUID4(user__uuid)})
+
+    ) is not None:
+        print(existing_task)
+        return existing_task
+ 
 
 async def delete_profile(user__uuid:str):
     profile=await profile_collection.find_one({"user":UUID4(user__uuid)})

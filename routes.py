@@ -40,21 +40,22 @@ async def get_profile_data(user_uuid:str):
     return ErrorResponseModel("An error occurred.", 404, "Profile doesn't exist.")
 
 
-@router.put("/{user_uuidid}")
+@router.put("/{user_uuid}")
 async def update_profile_data(user_uuid:str,req:UpdateProfileModel=Body(...),user: User = Depends(fastapi_users.get_current_user)):
-    req={k:v for k,v in req.dict().items() if v is not None}
-    updated_profile=await update_profile(user_uuid,req)
-    if updated_profile:
+    reqq={k:v for k,v in req.dict().items() if v is not None} 
+    updated_profile=await update_profile(user_uuid,reqq)
+    if updated_profile==None :
+        return ErrorResponseModel(
+            "An error occurred",
+            404,
+            "error updating data",
+        )
+    else :
         return ResponseModel(
             "Profile with ID: {} name update is successful".format(user_uuid),
             "Profile name updated successfully",
         )
-    return ErrorResponseModel(
-        "An error occurred",
-        404,
-        "There was an error updating the profile data.",
-    )
-
+ 
 #hay que buscar como borrar el perfil si el user se elimina
 
 @router.delete("/{user_uuid}",response_description="Profile data deleted from the database")
